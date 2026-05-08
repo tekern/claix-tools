@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=2160, height=3840, initial-scale=1.0">
+<title>클랙스 AI보드 수업도우미</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-main: #2563EB;
+    --blue-light: #60A5FA;
+    --blue-pale: #DBEAFE;
+    --blue-sky: #EFF6FF;
+    --white: #FFFFFF;
+    --gray-1: #F8FAFC;
+    --gray-2: #E2E8F0;
+    --gray-text: #64748B;
+    --dark: #1E293B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: linear-gradient(160deg, #EFF6FF 0%, #DBEAFE 40%, #BFDBFE 100%);
+    width: 2160px;
+    min-height: 3840px;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* 배경 장식 원 */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -300px;
+    right: -300px;
+    width: 1200px;
+    height: 1200px;
+    background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -400px;
+    left: -200px;
+    width: 1400px;
+    height: 1400px;
+    background: radial-gradient(circle, rgba(96,165,250,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* 헤더 */
+  .header {
+    padding: 120px 140px 80px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+  }
+
+  .logo-icon {
+    width: 130px;
+    height: 130px;
+    background: var(--blue-main);
+    border-radius: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 20px 60px rgba(37,99,235,0.35);
+  }
+
+  .logo-icon svg {
+    width: 80px;
+    height: 80px;
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo-name {
+    font-size: 80px;
+    font-weight: 900;
+    color: var(--blue-main);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+
+  .logo-sub {
+    font-size: 40px;
+    font-weight: 500;
+    color: var(--gray-text);
+    margin-top: 8px;
+    letter-spacing: 0;
+  }
+
+  /* 구분선 */
+  .divider {
+    width: 4px;
+    height: 100px;
+    background: var(--blue-pale);
+    border-radius: 2px;
+    margin: 0 40px;
+  }
+
+  .header-title {
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  /* 섹션 타이틀 */
+  .section {
+    padding: 0 140px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .section-title {
+    font-size: 52px;
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 60px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 60px;
+    background: var(--blue-main);
+    border-radius: 8px;
+  }
+
+  /* 앱 그리드 */
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 60px;
+    margin-bottom: 120px;
+  }
+
+  .app-card {
+    background: var(--white);
+    border-radius: 48px;
+    padding: 80px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 36px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow:
+      0 4px 24px rgba(37,99,235,0.08),
+      0 1px 4px rgba(0,0,0,0.04);
+    border: 3px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .app-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px;
+    background: var(--card-accent, var(--blue-main));
+    border-radius: 48px 48px 0 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .app-card:hover {
+    transform: translateY(-16px) scale(1.02);
+    box-shadow:
+      0 40px 80px rgba(37,99,235,0.18),
+      0 8px 24px rgba(37,99,235,0.12);
+    border-color: var(--blue-light);
+  }
+
+  .app-card:hover::before { opacity: 1; }
+
+  .app-card:active {
+    transform: translateY(-8px) scale(0.99);
+  }
+
+  /* 아이콘 영역 */
+  .app-icon-wrap {
+    width: 200px;
+    height: 200px;
+    border-radius: 50px;
+    background: var(--card-bg, var(--blue-sky));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 100px;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .app-card:hover .app-icon-wrap {
+    transform: scale(1.1) rotate(-4deg);
+  }
+
+  .app-name {
+    font-size: 52px;
+    font-weight: 800;
+    color: var(--dark);
+    text-align: center;
+    letter-spacing: -1px;
+  }
+
+  .app-desc {
+    font-size: 36px;
+    color: var(--gray-text);
+    text-align: center;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .app-badge {
+    background: var(--card-accent, var(--blue-main));
+    color: white;
+    font-size: 30px;
+    font-weight: 700;
+    padding: 12px 32px;
+    border-radius: 100px;
+    margin-top: 8px;
+  }
+
+  /* 준비중 카드 */
+  .app-card.coming-soon {
+    opacity: 0.5;
+    cursor: default;
+    filter: grayscale(0.3);
+  }
+
+  .app-card.coming-soon:hover {
+    transform: none;
+    box-shadow: 0 4px 24px rgba(37,99,235,0.08);
+    border-color: transparent;
+  }
+
+  /* 푸터 */
+  .footer {
+    padding: 80px 140px 120px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
+    border-top: 3px solid var(--blue-pale);
+    margin-top: 40px;
+  }
+
+  .footer-logo {
+    font-size: 44px;
+    font-weight: 900;
+    color: var(--blue-main);
+    letter-spacing: -1px;
+  }
+
+  .footer-info {
+    font-size: 34px;
+    color: var(--gray-text);
+  }
+
+  /* 떠다니는 별 장식 */
+  .deco-star {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0.15;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-40px) rotate(10deg); }
+  }
+
+  /* 페이지 진입 애니메이션 */
+  .app-card {
+    animation: cardIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .app-card:nth-child(1) { animation-delay: 0.05s; }
+  .app-card:nth-child(2) { animation-delay: 0.10s; }
+  .app-card:nth-child(3) { animation-delay: 0.15s; }
+  .app-card:nth-child(4) { animation-delay: 0.20s; }
+  .app-card:nth-child(5) { animation-delay: 0.25s; }
+  .app-card:nth-child(6) { animation-delay: 0.30s; }
+  .app-card:nth-child(7) { animation-delay: 0.35s; }
+  .app-card:nth-child(8) { animation-delay: 0.40s; }
+  .app-card:nth-child(9) { animation-delay: 0.45s; }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(60px) scale(0.92); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .header {
+    animation: headerIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  @keyframes headerIn {
+    from { opacity: 0; transform: translateY(-40px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- 장식 별 -->
+<div class="deco-star" style="top:400px; right:300px; font-size:120px; animation-delay:0s;">⭐</div>
+<div class="deco-star" style="top:1200px; left:200px; font-size:80px; animation-delay:1.5s;">✦</div>
+<div class="deco-star" style="top:2400px; right:400px; font-size:100px; animation-delay:3s;">✦</div>
+<div class="deco-star" style="top:3200px; left:300px; font-size:90px; animation-delay:0.8s;">⭐</div>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="logo-area">
+    <div class="logo-icon">
+      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M40 8 L56 24 L72 28 L60 44 L64 60 L40 52 L16 60 L20 44 L8 28 L24 24 Z" fill="white" opacity="0.9"/>
+        <circle cx="40" cy="38" r="14" fill="white"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <span class="logo-name">claix</span>
+      <span class="logo-sub">AI 보드</span>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="header-title">수업도우미</div>
+</div>
+
+<!-- 앱 그리드 -->
+<div class="section">
+  <div class="section-title">도구 모음</div>
+  <div class="app-grid">
+
+    <!-- 1. 세계시간여행 -->
+    <a class="app-card" href="worldclock.html" style="--card-accent:#2563EB; --card-bg:#EFF6FF;">
+      <div class="app-icon-wrap">🌍</div>
+      <div class="app-name">세계시간여행</div>
+      <div class="app-desc">전 세계 도시의<br>현재 시간 확인</div>
+      <div class="app-badge">사용 가능</div>
+    </a>
+
+    <!-- 2. 타이머 -->
+    <a class="app-card coming-soon" style="--card-accent:#7C3AED; --card-bg:#F5F3FF;">
+      <div class="app-icon-wrap">⏱️</div>
+      <div class="app-name">타이머</div>
+      <div class="app-desc">수업 시간 관리를<br>위한 카운트다운</div>
+      <div class="app-badge" style="background:#94A3B8;">준비 중</div>
+    </a>
+
+    <!-- 3. 뽀모도로 -->
+    <a class="app-card coming-soon" style="--card-accent:#DC2626; --card-bg:#FEF2F2;">
+      <div class="app-icon-wrap">🍅</div>
+      <div class="app-name">뽀모도로</div>
+      <div class="app-desc">집중 25분 +<br>휴식 5분 사이클</div>
+      <div class="app-badge" style="background:#94A3B8;">준비 중</div>
+    </a>
+
+    <!-- 4. 스톱워치 -->
+    <a class="app-card coming-soon" style="--card-accent:#059669; --card-bg:#ECFDF5;">
+      <div class="app-icon-wrap">⏲️</div>
+      <div class="app-name">스톱워치</div>
+      <div class="app-desc">랩 타임 기록이<br>가능한 스톱워치</div>
+      <div class="app-badge" style="background:#94A3B8;">준비 중</div>
+    </a>
+
+    <!-- 5. 그림판 -->
+    <a class="app-card coming-soon" style="--card-accent:#D97706; --card-bg:#FFFBEB;">
+      <div class="app-icon-wrap">🎨</div>
+      <div class="app-name">그림판</div>
+      <div class="app-desc">스탬프 & 배경변경<br>교실 그림 도구</div>
+      <div class="app-badge" style="background:#94A3B8;">준비 중</div>
+    </a>
+
+    <!-- 6. 소음측정기 -->
+    <a class="app-card coming-soon" style="--card-accent:#0891B2; --card-bg:#ECFEFF;">
+      <div class="app-icon-wrap">🔊</div>
+      <div class="app-name">소음측정기</div>
+      <div class="app-desc">교실 소음 수준을<br>실시간으로 측정</div>
+      <div class="app-badge" style="background:#94A3B8;">준비 중</div>
+    </a>
+
+    <!-- 7. 발표자 선정 -->
+    <a class="app-card coming-soon" style="--card-accent:#7C3AED; --card-bg:#F5F3FF;">
+      <div class="app-icon-wrap">🎲</div>
+      <div class="app-name">발표자 선정</div>
+      <div class="app-desc">공정한 랜덤으로<br>발표자를 선택</div>
+      <div class="app-badge" style="background:#94A3B8;">준비 중</div>
+    </a>
+
+    <!-- 8. 악기 -->
+    <a class="app-card coming-soon" style="--card-accent:#BE185D; --card-bg:#FDF2F8;">
+      <div class="app-icon-wrap">🎵</div>
+      <div class="app-name">악기</div>
+      <div class="app-desc">수업에서 활용하는<br>가상 악기 연주</div>
+      <div class="app-badge" style="background:#94A3B8;">준비 중</div>
+    </a>
+
+    <!-- 9. 사다리 -->
+    <a class="app-card coming-soon" style="--card-accent:#EA580C; --card-bg:#FFF7ED;">
+      <div class="app-icon-wrap">🪜</div>
+      <div class="app-name">사다리타기</div>
+      <div class="app-desc">모둠 배정 & 역할<br>분배를 위한 사다리</div>
+      <div class="app-badge" style="background:#94A3B8;">준비 중</div>
+    </a>
+
+  </div>
+</div>
+
+<!-- 푸터 -->
+<div class="footer">
+  <div class="footer-logo">✦ claix AI Board</div>
+  <div class="footer-info">수업도우미 v1.0 · 클랙스</div>
+</div>
+
+</body>
+</html>
