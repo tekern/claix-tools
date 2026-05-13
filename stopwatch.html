@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>스톱워치</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+  <style>
+    body {
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      margin: 0;
+      background-color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .app-container {
+      width: 1080px;
+      height: 1920px;
+      background-color: #F2F3F7;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 32px;
+      box-sizing: border-box;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- 1080x1920 Fixed Container -->
+  <div class="app-container shadow-2xl">
+    
+    <!-- Top Header -->
+    <header class="flex justify-between items-center mb-[40px]">
+      <div class="flex items-center gap-[24px]">
+        <button class="w-[66px] h-[66px] flex items-center justify-center text-[#111]" onclick="location.href='index.html'">
+          <svg class="w-[48px] h-[48px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <span class="text-[44px] font-bold text-[#111]">스톱워치</span>
+      </div>
+      <button class="w-[66px] h-[66px] flex items-center justify-center text-[#111]" onclick="location.href='index.html'">
+        <svg class="w-[48px] h-[48px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </header>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+      
+      <!-- Stopwatch Display Card -->
+      <div class="bg-white rounded-[40px] px-[50px] py-[70px] flex flex-col items-center">
+        <!-- Status Tooltip -->
+        <div class="self-end bg-[#0066FF] text-white text-[32px] font-medium py-[16px] px-[40px] rounded-[16px] relative mb-[20px]">
+          측정 준비 완료
+          <div class="absolute bottom-[-16px] right-[40px] w-0 h-0 border-l-[10px] border-l-transparent border-t-[16px] border-t-[#0066FF] border-r-[10px] border-r-transparent"></div>
+        </div>
+
+        <div class="text-[190px] font-bold text-[#111] tabular-nums tracking-tighter leading-none my-[50px]" id="timeDisplay">
+          00:00.00
+        </div>
+        
+        <div class="flex gap-[40px] w-full mt-[30px]">
+          <button id="btnLap" class="flex-1 h-[140px] bg-[#F2F3F7] text-[#555] rounded-[20px] text-[44px] font-semibold active:scale-95 transition-transform">랩</button>
+          <button id="btnStart" class="flex-1 h-[140px] bg-[#0066FF] text-white rounded-[20px] text-[44px] font-semibold active:scale-95 transition-transform shadow-lg shadow-blue-200">시작</button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex gap-[50px] px-[20px] mt-[70px] mb-[40px]" id="tabContainer">
+        <div class="text-[44px] font-bold text-[#111] pb-[20px] relative cursor-pointer" id="tabLapsBtn">
+          랩 기록
+          <div class="absolute bottom-[-4px] left-0 right-0 h-[8px] bg-[#0066FF] rounded-t-full" id="tabLapsIndicator"></div>
+        </div>
+        <div class="text-[44px] font-medium text-[#999] pb-[20px] relative cursor-pointer" id="tabStatsBtn">
+          통계
+          <div class="absolute bottom-[-4px] left-0 right-0 h-[8px] bg-[#0066FF] rounded-t-full hidden" id="tabStatsIndicator"></div>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="bg-white rounded-[40px] flex-1 overflow-hidden flex flex-col h-full relative">
+        <!-- Laps List -->
+        <div class="overflow-y-auto scrollbar-hide flex-1 p-[50px]" id="lapsList">
+          <div class="flex flex-col items-center justify-center h-full gap-[30px] mt-10">
+            <img src="https://tekern.github.io/claix-tools/clu01.png" alt="Character" class="w-[360px] h-auto object-contain" />
+            <span class="text-[#777] text-[38px] font-medium text-center leading-snug">
+              시작 버튼을 눌러<br/>시간 측정을 시작해 주세요
+            </span>
+          </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="overflow-y-auto scrollbar-hide flex-1 p-[50px] hidden" id="statsList">
+          <div class="flex flex-col items-center justify-center h-full gap-[30px] mt-10">
+            <img src="https://tekern.github.io/claix-tools/clu01.png" alt="Character" class="w-[360px] h-auto object-contain" />
+            <span class="text-[#777] text-[38px] font-medium text-center leading-snug">
+              기록이 없어<br/>통계를 확인할 수 없어요
+            </span>
+          </div>
+        </div>
+      </div>
+      
+    </main>
+
+  </div>
+
+  <script>
+    let startTime = 0;
+    let savedTime = 0;
+    let difference = 0;
+    let timerInterval = null;
+    let isRunning = false;
+    let laps = [];
+    let currentTab = 'laps';
+
+    const timeDisplay = document.getElementById('timeDisplay');
+    const btnStart = document.getElementById('btnStart');
+    const btnLap = document.getElementById('btnLap');
+    const lapsList = document.getElementById('lapsList');
+    const statsList = document.getElementById('statsList');
+    const tabLapsBtn = document.getElementById('tabLapsBtn');
+    const tabStatsBtn = document.getElementById('tabStatsBtn');
+    const tabLapsIndicator = document.getElementById('tabLapsIndicator');
+    const tabStatsIndicator = document.getElementById('tabStatsIndicator');
+
+    function formatTime(ms) {
+      const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+      const milliseconds = Math.floor((ms % 1000) / 10);
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(2, '0')}`;
+    }
+
+    function updateDisplay(ms) {
+      timeDisplay.textContent = formatTime(ms);
+    }
+
+    function startTimer() {
+      startTime = Date.now() - savedTime;
+      timerInterval = setInterval(() => {
+        difference = Date.now() - startTime;
+        updateDisplay(difference);
+      }, 10);
+      isRunning = true;
+      btnStart.textContent = '정지';
+      btnStart.className = 'flex-1 h-[140px] bg-[#FF3B30] text-white rounded-[20px] text-[44px] font-semibold active:scale-95 transition-transform shadow-lg shadow-red-200';
+      btnLap.textContent = '랩';
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      savedTime = difference;
+      isRunning = false;
+      btnStart.textContent = '계속';
+      btnStart.className = 'flex-1 h-[140px] bg-[#0066FF] text-white rounded-[20px] text-[44px] font-semibold active:scale-95 transition-transform shadow-lg shadow-blue-200';
+      btnLap.textContent = '초기화';
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      savedTime = 0;
+      difference = 0;
+      isRunning = false;
+      laps = [];
+      updateDisplay(0);
+      if (currentTab === 'laps') renderLaps();
+      else renderStats();
+      btnStart.textContent = '시작';
+      btnStart.className = 'flex-1 h-[140px] bg-[#0066FF] text-white rounded-[20px] text-[44px] font-semibold active:scale-95 transition-transform shadow-lg shadow-blue-200';
+      btnLap.textContent = '랩';
+    }
+
+    function addLap() {
+      const prevTotal = laps.length > 0 ? laps[0].total : 0;
+      const lapTime = difference - prevTotal;
+      laps.unshift({ total: difference, split: lapTime });
+      if (currentTab === 'laps') renderLaps();
+      else renderStats();
+    }
+
+    function renderLaps() {
+      if (laps.length === 0) {
+        lapsList.innerHTML = `
+          <div class="flex flex-col items-center justify-center h-full gap-[30px] mt-10">
+            <img src="https://tekern.github.io/claix-tools/clu01.png" alt="Character" class="w-[360px] h-auto object-contain" />
+            <span class="text-[#777] text-[38px] font-medium text-center leading-snug">
+              시작 버튼을 눌러<br/>시간 측정을 시작해 주세요
+            </span>
+          </div>
+        `;
+        return;
+      }
+      lapsList.innerHTML = laps.map((lap, idx) => {
+        const lapNum = laps.length - idx;
+        const colorClass = idx === 0 ? 'text-[#0066FF] font-bold' : 'text-[#222] font-semibold';
+        return `
+          <div class="flex justify-between items-center py-[40px] border-b-[2px] border-[#F2F3F7] text-[40px]">
+            <span class="text-[#999] font-medium w-[120px]">${String(lapNum).padStart(2, '0')}</span>
+            <span class="${colorClass} tabular-nums">${formatTime(lap.total)}</span>
+            <span class="text-[#777] text-[36px] tabular-nums font-medium">+${formatTime(lap.split)}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderStats() {
+      if (laps.length === 0) {
+        statsList.innerHTML = `
+          <div class="flex flex-col items-center justify-center h-full gap-[30px] mt-10">
+            <img src="https://tekern.github.io/claix-tools/clu01.png" alt="Character" class="w-[360px] h-auto object-contain" />
+            <span class="text-[#777] text-[38px] font-medium text-center leading-snug">
+              기록이 없어<br/>통계를 확인할 수 없어요
+            </span>
+          </div>
+        `;
+        return;
+      }
+      let minSplit = Infinity, maxSplit = 0, totalSplit = 0;
+      laps.forEach(lap => {
+        if (lap.split < minSplit) minSplit = lap.split;
+        if (lap.split > maxSplit) maxSplit = lap.split;
+        totalSplit += lap.split;
+      });
+      const avgSplit = totalSplit / laps.length;
+      statsList.innerHTML = `
+        <div class="flex flex-col gap-[30px]">
+          <div class="bg-[#F2F3F7] rounded-[30px] p-[40px] flex justify-between items-center">
+            <span class="text-[#777] text-[36px] font-medium">총 측정 구간</span>
+            <span class="text-[#111] text-[40px] font-bold">${laps.length}</span>
+          </div>
+          <div class="bg-[#F2F3F7] rounded-[30px] p-[40px] flex justify-between items-center">
+            <span class="text-[#777] text-[36px] font-medium">가장 빠른 랩</span>
+            <span class="text-[#0066FF] text-[40px] font-bold tabular-nums">${formatTime(minSplit)}</span>
+          </div>
+          <div class="bg-[#F2F3F7] rounded-[30px] p-[40px] flex justify-between items-center">
+            <span class="text-[#777] text-[36px] font-medium">가장 느린 랩</span>
+            <span class="text-[#FF3B30] text-[40px] font-bold tabular-nums">${formatTime(maxSplit)}</span>
+          </div>
+          <div class="bg-[#F2F3F7] rounded-[30px] p-[40px] flex justify-between items-center">
+            <span class="text-[#777] text-[36px] font-medium">평균 랩타임</span>
+            <span class="text-[#111] text-[40px] font-bold tabular-nums">${formatTime(avgSplit)}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function switchTab(tab) {
+      if (tab === 'laps') {
+        tabLapsBtn.className = 'text-[44px] font-bold text-[#111] pb-[20px] relative cursor-pointer';
+        tabStatsBtn.className = 'text-[44px] font-medium text-[#999] pb-[20px] relative cursor-pointer';
+        tabLapsIndicator.classList.remove('hidden');
+        tabStatsIndicator.classList.add('hidden');
+        lapsList.classList.remove('hidden');
+        statsList.classList.add('hidden');
+        renderLaps();
+      } else {
+        tabLapsBtn.className = 'text-[44px] font-medium text-[#999] pb-[20px] relative cursor-pointer';
+        tabStatsBtn.className = 'text-[44px] font-bold text-[#111] pb-[20px] relative cursor-pointer';
+        tabLapsIndicator.classList.add('hidden');
+        tabStatsIndicator.classList.remove('hidden');
+        lapsList.classList.add('hidden');
+        statsList.classList.remove('hidden');
+        renderStats();
+      }
+      currentTab = tab;
+    }
+
+    tabLapsBtn.addEventListener('click', () => switchTab('laps'));
+    tabStatsBtn.addEventListener('click', () => switchTab('stats'));
+
+    btnStart.addEventListener('click', () => {
+      if (isRunning) stopTimer();
+      else startTimer();
+    });
+
+    btnLap.addEventListener('click', () => {
+      if (isRunning) addLap();
+      else resetTimer();
+    });
+  </script>
+</body>
+</html>
