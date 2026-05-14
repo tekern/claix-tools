@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Focus Bear Timer</title>
+    <style>
+        :root {
+            --bg-color: #EDF4FF;
+            --white: #FFFFFF;
+            --primary: #0056FF;
+            --primary-gradient: linear-gradient(135deg, #1A75FF 0%, #0056FF 100%);
+            --text-main: #333333;
+            --text-secondary: #666666;
+            --border-color: #E0E7F1;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+            --radius-lg: 32px;
+            --radius-md: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: var(--text-main);
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            max-width: 540px;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            padding: 8px 0;
+        }
+
+        header {
+            padding: 8px 20px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            height: 50px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            color: var(--text-main);
+        }
+
+        .back-btn svg { width: 22px; height: 22px; margin-right: 4px; }
+
+        .close-btn {
+            padding: 6px 14px;
+            margin-left: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: white;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .main-card {
+            flex: 1;
+            background-color: var(--white);
+            margin: 0 16px 12px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            position: relative;
+            justify-content: space-between;
+            min-height: 0; /* Allow card to shrink if needed */
+        }
+
+        .time-display {
+            font-size: 56px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
+            line-height: 1;
+            margin-top: 0;
+        }
+
+        .timer-circle-container {
+            position: relative;
+            width: 190px;
+            height: 190px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .progress-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-bg { fill: none; stroke: #F0F4F9; stroke-width: 6; }
+        .progress-bar {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+
+        .progress-dot {
+            fill: var(--primary);
+            stroke: white;
+            stroke-width: 2.5;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+.character-img {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+
+    left: 45%;
+    top: 63%;
+
+    transform: translate(-50%, -50%);
+
+    z-index: 2;
+}
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-6px) scale(1.02); }
+        }
+
+        .speech-bubble {
+            position: absolute;
+            top: 25px;
+            background-color: white;
+            padding: 6px 12px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 108, 255, 0.1);
+            text-align: center;
+            font-size: 11px;
+            color: var(--primary);
+            font-weight: 600;
+            line-height: 1.3;
+            z-index: 3;
+            border: 1px solid rgba(0, 108, 255, 0.1);
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid white;
+        }
+
+
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.7; } 50% { transform: scale(1.15); opacity: 1; } }
+
+        .settings-section { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+
+        .setting-box {
+            background-color: #F9FBFE;
+            border: 1px solid #EEF2F7;
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+        }
+
+        .setting-title {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        .setting-title svg { width: 13px; height: 13px; margin-right: 5px; color: var(--primary); }
+
+        .adjust-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .adjust-item { display: flex; align-items: center; background: white; border-radius: 10px; padding: 2px; border: 1px solid #EBEFF5; }
+        .adjust-item button { 
+            background: none; border: none; color: var(--primary); 
+            font-size: 16px; width: 28px; height: 28px; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
+        }
+        .adjust-item span { flex: 1; text-align: center; font-weight: 700; font-size: 14px; }
+
+        .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .quick-btn {
+            background: white; border: 1px solid #E9F0F8; border-radius: 8px;
+            padding: 6px 0; font-size: 11px; font-weight: 400; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .quick-btn.active { background: var(--primary-gradient); color: white; border-color: transparent; font-weight: 700; }
+
+        .bottom-action {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 12px;
+            padding: 0 16px;
+            margin-bottom: 24px;
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 0;
+            cursor: pointer;
+            color: var(--text-secondary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid #F0F4F8;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 75px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+            background-color: #F9FBFE;
+        }
+
+        .action-item-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .action-btn span {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .action-btn.primary-action {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 20px rgba(0, 108, 255, 0.25);
+        }
+
+        .action-btn.primary-action.stop-mode {
+            background: linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%);
+            box-shadow: 0 8px 20px rgba(238, 82, 83, 0.3);
+        }
+
+        .action-btn.primary-action:active {
+            opacity: 0.9;
+        }
+
+        .action-item-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .glow-finish { animation: glow-pulse 1.5s infinite; }
+        @keyframes glow-pulse { 
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 108, 255, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(0, 108, 255, 0.7); }
+        }
+
+        .main-card.focus-mode {
+            animation: card-breathing-glow 2.5s infinite ease-in-out;
+            border-color: rgba(0, 108, 255, 0.25);
+        }
+
+        @keyframes card-breathing-glow {
+            0% { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 0 0 0px rgba(0, 108, 255, 0.15); }
+            50% { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 0 25px 10px rgba(0, 108, 255, 0.2); }
+            100% { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 0 0 0px rgba(0, 108, 255, 0.15); }
+        }
+
+        /* Focus Mode Breathing Glow */
+        .speech-bubble.focus-mode {
+            background-color: #EDF4FF;
+            animation: breathing-glow 2.5s infinite ease-in-out;
+            border-color: rgba(0, 108, 255, 0.3);
+        }
+
+        .speech-bubble.focus-mode::after {
+            border-top-color: #EDF4FF;
+        }
+
+        @keyframes breathing-glow {
+            0% { box-shadow: 0 4px 12px rgba(0, 108, 255, 0.1), 0 0 0 0px rgba(0, 108, 255, 0.25); }
+            50% { box-shadow: 0 4px 12px rgba(0, 108, 255, 0.1), 0 0 20px 10px rgba(0, 108, 255, 0.3); }
+            100% { box-shadow: 0 4px 12px rgba(0, 108, 255, 0.1), 0 0 0 0px rgba(0, 108, 255, 0.25); }
+        }
+
+        @media (max-height: 800px) {
+            .time-display { font-size: 56px; }
+            .timer-circle-container { width: 220px; height: 220px; }
+            .character-img { width: 140px; height: 140px; }
+            .main-card { padding: 15px; }
+            .setting-box { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="back-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                타이머
+            </button>
+            <button class="close-btn">닫기</button>
+        </header>
+
+        <div class="main-card" id="main-card">
+            <div class="time-display" id="time-display">15:00</div>
+
+            <div class="timer-circle-container">
+                <div class="speech-bubble" id="speech-bubble">화이팅!!<br>끝까지 집중해요!</div>
+                
+                <svg class="progress-svg" viewBox="0 0 200 200">
+                    <circle class="progress-bg" cx="100" cy="100" r="92"></circle>
+                    <circle id="progress-bar" class="progress-bar" cx="100" cy="100" r="92" stroke-dasharray="578" stroke-dashoffset="578"></circle>
+                </svg>
+                
+                <!-- Character Image -->
+                <img src="character.png" alt="Bear" class="character-img" id="char-img">
+            </div>
+
+            <div class="settings-section">
+                <div class="setting-box">
+                    <div class="setting-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        시간 설정
+                    </div>
+                    <div class="adjust-controls">
+                        <div class="adjust-item">
+                            <button id="min-minus">−</button>
+                            <span id="min-label">15</span>분
+                            <button id="min-plus">+</button>
+                        </div>
+                        <div class="adjust-item">
+                            <button id="sec-minus">−</button>
+                            <span id="sec-label">00</span>초
+                            <button id="sec-plus">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-box">
+                    <div class="setting-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        빠른 시간 선택
+                    </div>
+                    <div class="quick-grid">
+                        <button class="quick-btn" data-sec="60">1분</button>
+                        <button class="quick-btn" data-sec="180">3분</button>
+                        <button class="quick-btn" data-sec="300">5분</button>
+                        <button class="quick-btn" data-sec="600">10분</button>
+                        <button class="quick-btn active" data-sec="900">15분</button>
+                        <button class="quick-btn" data-sec="1200">20분</button>
+                        <button class="quick-btn" data-sec="1500">25분</button>
+                        <button class="quick-btn" data-sec="1800">30분</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-action">
+            <button class="action-btn" id="reset-btn">
+                <div class="action-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                </div>
+                <span>초기화</span>
+            </button>
+            <button class="action-btn primary-action" id="start-btn">
+                <div class="action-item-icon" id="start-icon-container">
+                    <svg id="start-svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </div>
+                <span id="start-label">시작</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const timeDisplay = document.getElementById('time-display');
+        const minLabel = document.getElementById('min-label');
+        const secLabel = document.getElementById('sec-label');
+        const progressBar = document.getElementById('progress-bar');
+        const startBtn = document.getElementById('start-btn');
+        const startLabel = document.getElementById('start-label');
+        const startIconContainer = document.getElementById('start-icon-container');
+        const resetBtn = document.getElementById('reset-btn');
+        const quickBtns = document.querySelectorAll('.quick-btn');
+        const mainCard = document.getElementById('main-card');
+        const speechBubble = document.getElementById('speech-bubble');
+
+        let duration = 900;
+        let timeRemaining = 900;
+        let timer = null;
+        let isRunning = false;
+
+        const CIRC = 578;
+
+        function update() {
+            const m = Math.floor(timeRemaining / 60);
+            const s = timeRemaining % 60;
+            timeDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            
+            if (!isRunning) {
+                minLabel.textContent = m;
+                secLabel.textContent = String(s).padStart(2, '0');
+            }
+
+            const pct = timeRemaining / duration;
+            const offset = CIRC * (1 - pct);
+            progressBar.style.strokeDashoffset = offset;
+
+            if (timeRemaining === 0) {
+                mainCard.classList.add('glow-finish');
+                stop();
+            } else {
+                mainCard.classList.remove('glow-finish');
+            }
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                stop();
+            } else {
+                start();
+            }
+        }
+
+        function start() {
+            if (isRunning || timeRemaining <= 0) return;
+            isRunning = true;
+            
+            // Update Button UI to STOP mode
+            startLabel.textContent = '중지';
+            startBtn.classList.add('stop-mode');
+            startIconContainer.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>';
+            
+            // Focus Mode UI
+            speechBubble.classList.add('focus-mode');
+            mainCard.classList.add('focus-mode');
+            speechBubble.innerHTML = '집중하는 당신!!<br>정말 멋져요! ✨';
+            
+            timer = setInterval(() => {
+                timeRemaining--;
+                update();
+                if (timeRemaining <= 0) stop();
+            }, 1000);
+        }
+
+        function stop() {
+            isRunning = false;
+            clearInterval(timer);
+            
+            // Revert Button UI to START mode
+            startLabel.textContent = '시작';
+            startBtn.classList.remove('stop-mode');
+            startIconContainer.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+            
+            // Focus Mode Off
+            speechBubble.classList.remove('focus-mode');
+            mainCard.classList.remove('focus-mode');
+            speechBubble.innerHTML = '화이팅!!<br>끝까지 집중해요!';
+        }
+
+        function reset() {
+            stop();
+            timeRemaining = duration;
+            update();
+        }
+
+        startBtn.onclick = toggleTimer;
+        resetBtn.onclick = reset;
+
+        document.getElementById('min-plus').onclick = () => { if(!isRunning) { duration += 60; timeRemaining = duration; update(); } };
+        document.getElementById('min-minus').onclick = () => { if(!isRunning && duration >= 60) { duration -= 60; timeRemaining = duration; update(); } };
+        document.getElementById('sec-plus').onclick = () => { if(!isRunning) { duration += 1; timeRemaining = duration; update(); } };
+        document.getElementById('sec-minus').onclick = () => { if(!isRunning && duration > 0) { duration -= 1; timeRemaining = duration; update(); } };
+
+        quickBtns.forEach(b => {
+            b.onclick = () => {
+                if (isRunning) return;
+                quickBtns.forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                duration = parseInt(b.dataset.sec);
+                timeRemaining = duration;
+                update();
+            };
+        });
+
+        update();
+    </script>
+</body>
+</html>
